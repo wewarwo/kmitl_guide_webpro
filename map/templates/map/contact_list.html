@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Messages from users</title>
+</head>
+<body>
+<nav id="main-nav" class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" role="navigation">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">KMITL GUIDE</a>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Content here -->
+    <form id="myform" action="{% url 'deletemsg' %}" method="GET">
+        <input type="number" id="msg_id" name="msg_id" style="visibility: hidden;">
+    </form>
+
+    {% for i in contact_list %}
+        <div class="card w-auto mt-5">
+            <div class="card-body">
+                <h5 class="card-title">[{{ i.Subject_type }}] {{ i.subject }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Location: {{ i.Location }}</h6>
+                <p class="card-text">{{ i.Description }}</p>
+                <a href="#" class="card-link">Read</a>
+                <a href="javascript:deletethis({{ i.id }})" class="card-link">Delete</a>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+
+<script>
+    function deletethis(num) {
+        document.querySelector("#msg_id").value = num;
+        document.querySelector("#myform").submit();
+    }
+</script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

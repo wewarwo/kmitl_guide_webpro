@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>KMITL GUIDE ♥</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="icon" href="{% static '/img/map-marker.png' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel='stylesheet' type='text/css' media='screen' href='{% static '/css/main.css' %}'>
+</head>
+
+<body>
+<!-- navbar -->
+<nav id="main-nav" class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" role="navigation">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">KMITL GUIDE</a>
+        <button class="navbar-toggler border-0" type="button" data-toggle="collapse"
+                data-target="#exCollapsingNavbar">
+            &#9776;
+        </button>
+        <div class="collapse navbar-collapse" id="exCollapsingNavbar">
+            <form class="form-inline my-2 my-lg-0" method="GET" action="{% url 'index' %}">
+                <input class="form-control mr-sm-2" type="search" name="search_name"
+                       placeholder="Where are you looking?">
+                <button class="btn btn-primary my-2 my-sm-0" type="submit">Find</button>
+            </form>
+            <ul class="nav navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        Filter
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div class="ml-3 form-check">
+                            <form method="GET" action="{% url 'filtered' %}" id="filtertype">
+                                {% for i in location_type %}
+                                    {% if i in selected_type %}
+                                        <input value="{{ i }}" name="filter_item" type="checkbox"
+                                               class="form-check-input"
+                                               checked>
+                                        <label class="form-check-label" for="materialUnchecked">{{ i }}</label>
+                                        <br>
+                                    {% else %}
+                                        <input value="{{ i }}" name="filter_item" type="checkbox"
+                                               class="form-check-input">
+                                        <label class="form-check-label" for="materialUnchecked">{{ i }}</label>
+                                        <br>
+                                    {% endif %}
+
+                                {% endfor %}
+                                <button type="submit" class="w-auto btn btn-primary">Filter it!</button>
+                            </form>
+
+                        </div>
+
+
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        Find nearest.
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <div class="form-check">
+                            <form method="GET" action="" id="filtertype">
+                                <div class="mr-3 form-group">
+                                    <label for="disabledSelect">Select type.</label>
+                                    <select id="disabledSelect" class="form-control">
+                                        {% for i in location_type %}
+                                            <option>{{ i }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-auto btn btn-primary">Find it !</button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            {% if user.is_authenticated and user.is_staff == 0 %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contact' %}">Contact admin</a>
+                </li>
+            {% endif %}
+            {% if user.is_authenticated and user.is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contact_page' %}">Messages</a>
+                </li>
+            {% endif %}
+            </ul>
+            <ul class="nav navbar-nav flex-row justify-content-between ml-auto">
+                <li class="nav-item order-2 order-md-1"><a href="#" class="nav-link" title="settings"><i
+                        class="fa fa-cog fa-fw fa-lg"></i></a></li>
+                <li class="dropdown order-1">
+                    {% if user.is_authenticated is False %}
+                        <button type="button" id="dropdownMenu1" data-toggle="dropdown"
+                                class="btn btn-danger dropdown-toggle">Login <span class="caret"></span>
+                        </button>
+                    {% endif %}
+                    <ul id="modal-login" class="dropdown-menu dropdown-menu-right mt-2">
+                        <li class="px-3 py-2">
+
+                            <form method="post" action="{% url 'login' %}" class="form" role="form">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <input name="username" id="emailInput" placeholder="username"
+                                           class="form-control form-control-sm"
+                                           type="text" required="">
+                                </div>
+                                <div class="form-group">
+                                    <input name="password" id="passwordInput" placeholder="Password"
+                                           class="form-control form-control-sm" type="password" required="">
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                                </div>
+                                <div class="form-group text-center">
+                                    <small><a href="{% url 'reset' %}">Forgot
+                                        password?</a></small>
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            Welcome, {{ user.username }}
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'logout' %}" class="nav-link">LOGOUT</a>
+                        </li>
+                    {% endif %}
+                {% if user.is_authenticated is False %}
+                    <button onclick="window.location.href='{% url 'register' %}'" type="button" class="btn btn-warning">
+                        Sign Up
+                    </button>
+                {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- modal-popup-login -->
+<div id="modalPassword" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Forgot password</h3>
+                <button type="button" class="close font-weight-light" data-dismiss="modal"
+                        aria-hidden="true">×
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Reset your password..</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                <button class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- modal-popup-location-detail -->
+<div class="modal fade bd-example-modal-lg" id="modalDetail" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetailTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <img id="locimg" src="" alt="">
+            <div id="modalDetailBody" class="modal-body">
+            </div>
+            <!-- comment -->
+            <div id="com_area" class="container">
+                <div class="card mb-4 w-auto" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ com.user_name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ com.create_date }}</h6>
+                        <p class="card-text">{{ com.content }}</p>
+                        {#                        <a href="#" class="card-link">Card link</a>#}
+                        {#                        <a href="#" class="card-link">Another link</a>#}
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="card mb-4 w-auto justify-content-center" style="width: 18rem;">
+                    <div class="card-body">
+                        <form method="GET" action="{% url 'addcomment' %}">
+                            {% if user.is_authenticated %}
+                                <input name="com1" class="form-control" type="text">
+                            {% endif %}
+
+                            <div class="input-group-append mt-2 d-flex justify-content-center">
+                                <input class="d-none" type="number" id="locid" name="locid">
+                                {% if user.is_authenticated %}
+                                    <button class="btn btn-outline-secondary" type="submit" value="Comment here....">
+                                        Comment
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+            </div>
+
+            <div class="modal-footer">
+                <form method="GET" action="{% url 'delete' %}">
+                    <input class="d-none" type="number" id="locid2" name="locid2">
+                    {% if user.is_authenticated and user.is_staff %}
+                        <button type="Submit" onclick="window.location.href='{% url 'delete' %}'"
+                                class="btn btn-primary">
+                            Delete
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- modal-popup-add-location -->
+<div class="modal" tabindex="-1" id="modalAdd" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Add location</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="GET" action="{% url 'addlocation' %}">
+                    <div class="form-group w-auto">
+                        <label for="locname" class="col-sm-2 col-form-label">Name</label>
+                        <div class="">
+                            <input name="locname" type="text" class="form-control" id="locname" placeholder="name">
+                        </div>
+                    </div>
+                    <div class="form-group w-auto">
+                        <label for="modalAddCoor" class="col-sm-2 col-form-label">Coordinate</label>
+                        <div class="">
+                            <input type="text" name="loccoor" class="form-control" id="modalAddCoor"
+                                   placeholder="Coordinate" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group w-auto">
+                        <label for="loccon" class="col-sm-2 col-form-label">Desription</label>
+                        <div class="">
+                            <input type="text" name="loccon" class="form-control" id="loccon" placeholder="Description"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group w-auto">
+                        <label for="loctype" class="col-sm-2 col-form-label">Type</label>
+                        <div class="">
+                            <label for="exampleFormControlSelect1"></label>
+                            <select class="form-control" name="loctype">
+                                {% for i in location_type %}
+                                    <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- end navbar -->
+<!-- googlemap -->
+<div id="map"></div>
+<div id="directionsPanel" style="float:right;width:30%;height 100%"></div>
+<script>
+    {#    {% for i in selected_type %}#}
+    {#        alert("{{ i }}")#}
+    {#    {% endfor %}#}
+    if ({{ nfound }}== 3
+    )
+    {
+        alert("Location not found");
+    }
+
+    if ({{ logerr }}==1
+    )
+    {
+        alert("Login error");
+    }
+
+    <!-- init map -->
+    function initMap() {
+        var directionsDisplay = new google.maps.DirectionsRenderer();
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: {{ zoom }},
+            center: {{ map_center }},
+            styles: [
+                {
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "administrative.land_parcel",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "administrative.neighborhood",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                }
+            ]
+        });
+        directionsDisplay.setMap(map);
+        directionsDisplay.setPanel(document.getElementById('directionsPanel'));
+        <!-- Marker Icon -->
+        var Parking = {
+            url: '{% static '/img/parking.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+        var Food = {
+            url: '{% static '/img/cafe.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+        var Faculty = {
+            url: '{% static '/img/faculty.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+        var ATM = {
+            url: '{% static '/img/atm.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+        var Other = {
+            url: '{% static '/img/map-marker.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+        var Shop = {
+            url: '{% static '/img/shop.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+        var Bank = {
+            url: '{% static '/img/bank.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+        var Coffee = {
+            url: '{% static '/img/coffee.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+        var markadd = {
+            url: '{% static '/img/add.png' %}',
+            scaledSize: new google.maps.Size(30, 30), // scaled size
+            origin: new google.maps.Point(0, 0), // origin
+            anchor: new google.maps.Point(20, 20) // anchor
+        };
+
+
+        var marker = [];
+        count = 0;
+        {% for loc in location_list %}
+            {#alert({{ selected_type }});#}
+            {% if loc.location_type in  selected_type  %}
+                marker[count] = new google.maps.Marker({
+                    position: {{ loc.coordinate }},
+                    map: map,
+                    con: '{{ loc.descript }}',
+                    title: '{{ loc.location_name }}',
+                    img: '{{ loc.img_path }}',
+                    loc_id: '{{ loc.id }}',
+                    icon: {{ loc.location_type }},
+                    className: {{ loc.location_type }}.toString().toLowerCase()
+                });
+
+
+                {#marker[count].className = {{ loc.location_type }}.toString().toLowerCase();#}
+                marker[count].addListener('click', function () {
+                    var mark = marker[marker.lastIndexOf(this)];
+                    document.getElementById("modalDetailTitle").innerHTML = mark.title;
+                    document.getElementById("modalDetailBody").innerHTML = mark.con;
+                    document.getElementById("locimg").src = mark.img;
+                    document.getElementById("com_area").innerHTML = "";
+                    document.getElementById("locid").value = mark.loc_id;
+                    document.getElementById("locid2").value = mark.loc_id;
+                    {% for com in comment_list %}
+                        if ({{ com.location_id }} == mark.loc_id) {
+                        document.getElementById("com_area").innerHTML += "<div class=\"card mb-4 w-auto\" style=\"width: 18rem;\">\n" +
+                            "                    <div class=\"card-body\">\n" +
+                            "                        <h5 class=\"card-title\">{{ com.user_name }}</h5>\n" +
+                            "                        <h6 class=\"card-subtitle mb-2 text-muted\">{{ com.create_date }}</h6>\n" +
+                            "                        <p class=\"card-text\">{{ com.content }}</p>\n" +
+                            "                        {#                        <a href=\"#\" class=\"card-link\">Card link</a>#}\n" +
+                            "                        {#                        <a href=\"#\" class=\"card-link\">Another link</a>#}\n" +
+                            "                    </div>\n" +
+                            "                </div>";
+                    }
+                    {% endfor %}
+                    $('#modalDetail').modal('show');
+                    {#document.location.href = "{% url 'detail' mark.loc_id %}";#}
+                });
+                count++;
+            {% endif %}
+        {% endfor %}
+
+
+        {% if user.is_authenticated and user.is_staff %}
+            map.addListener('click', function (e) {
+                placeMarker(e.latLng, map);
+            });
+
+            var markers = []
+
+            function placeMarker(position, map) {
+                deleteMarkers();
+                var marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    icon: markadd
+                });
+                marker.addListener('click', function () {
+                    document.getElementById("modalAddCoor").value = position;
+                    $('#modalAdd').modal('show');
+                });
+                markers.push(marker);
+
+            }
+        {% endif %}
+
+        function setMapOnAll(map) {
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+            }
+        }
+
+        function deleteMarkers() {
+            clearMarkers();
+            markers = [];
+        }
+
+        function clearMarkers() {
+            setMapOnAll(null);
+        }
+
+        types = document.getElementsByName('filter_item')
+        filter_box = document.getElementById('filtertype')
+
+
+    }
+
+
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbZMun9YtA9IJqqc5xyLTkPbN2I7WRIxk&callback=initMap">
+</script>
+<!-- scripts -->
+<!-- <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY&callback=myMap"></script> -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+</script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+</script>
+</body>
+
+</html>
